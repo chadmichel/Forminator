@@ -55,11 +55,10 @@ export class DynamicTableComponent implements OnInit, AfterViewInit {
     this.query = this.route.snapshot.paramMap.get('query');
     this.provider = this.route.snapshot.paramMap.get('provider');
 
-    const response = await this.commander.processQueryCommand(
+    this.data = await this.commander.processQueryCommand(
       this.query,
       this.provider
     );
-    this.data = await response.data;
 
     if (this.data == null) {
       console.log('UNABLE TO LOAD DATA');

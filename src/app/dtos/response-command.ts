@@ -1,12 +1,12 @@
 import { MenuItem } from './menu-item';
+import { TableData } from './table-data';
 
 export interface ResponseCommand {
   guid?: string;
-  screen?: string;
+  browserSessionGuid?: string;
+  sessionGuid?: string;
+
   title?: string;
-  dataProvider?: string;
-  dataQueryText?: string;
-  selectItemCommand?: string;
   route?: string;
   menu?: MenuItem[];
   data?: any;

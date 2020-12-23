@@ -1,8 +1,10 @@
 export interface RequestCommand {
   guid?: string;
+  browserSessionGuid?: string;
+  sessionGuid?: string;
+
   text?: string;
   query?: string;
-  provider?: string;
   data?: any;
   commandType?: string;
 }

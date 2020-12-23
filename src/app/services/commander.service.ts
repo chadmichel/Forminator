@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { start } from 'repl';
+import { from } from 'rxjs';
 import { RequestCommand } from '../dtos/request-command';
 import { ResponseCommand } from '../dtos/response-command';
 import { TableData } from '../dtos/table-data';
 import { CacheService } from './cache.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
   providedIn: 'root',
@@ -15,41 +16,30 @@ export class CommanderService {
   async processQueryCommand(
     query: string,
     provider: string = 'CACHE'
-  ): Promise<ResponseCommand> {
-    return this.processCommand({
-      commandType: 'QUERY',
-      query: query,
-      provider: provider,
-    });
+  ): Promise<TableData> {
+    return (
+      await this.processCommand({
+        commandType: 'QUERY',
+        query: query,
+      })
+    ).data;
   }
 
   async processCommand(command: RequestCommand): Promise<ResponseCommand> {
-    // return new Promise<ResponseCommand>(async (success, failure) => {
-    //   try {
-    //     var response = await this.internalProcessCommand(command);
-    //     this.cache.writeLastResponse(response);
-    //     if (response.route) {
-    //       this.router.navigate([response.route]);
-    //     }
-    //     success(response);
-    //   } catch (err) {
-    //     console.log(err);
-    //     failure(err);
-    //   }
-    // });
-    //return new Promise<ResponseCommand>(async (success, failure) => {
-    try {
-      var response = await this.internalProcessCommand(command);
-      this.cache.writeLastResponse(response);
-      if (response.route) {
-        this.router.navigate([response.route]);
+    return new Promise<ResponseCommand>(async (success, failure) => {
+      try {
+        command.guid = uuidv4();
+        var response = this.internalProcessCommand(command);
+        this.cache.writeLastResponse(command, response);
+        if (response.route) {
+          this.router.navigate([response.route]);
+        }
+        success(response);
+      } catch (err) {
+        console.log(err);
+        failure(err);
       }
-      return response;
-    } catch (err) {
-      console.log(err);
-      //failure(err);
-    }
-    //});
+    });
   }
 
   currentMenu() {
@@ -59,68 +49,54 @@ export class CommanderService {
     }
     return [
       {
+        title: 'Home',
+        route: 'home',
+      },
+      {
         title: 'Sign up',
         route: 'signup',
       },
     ];
   }
 
-  private async internalProcessCommand(
-    command: RequestCommand
-  ): Promise<ResponseCommand> {
+  private internalProcessCommand(command: RequestCommand): ResponseCommand {
     switch (command.commandType.toLowerCase()) {
       case 'start':
-        return await this.startCommand(command);
+        return this.startCommand(command);
       case 'query':
-        return await this.queryCommand(command);
+        return this.queryCommand(command);
     }
   }
 
   private startCommand(command: RequestCommand): ResponseCommand {
     return {
       guid: command.guid,
-      screen: 'DynamicTable',
-      route: 'dt/contacts/allcontacts/cache',
+      route: 'dt/contacts/allcontacts',
       title: 'Contacts',
-      dataProvider: 'CACHE',
-      dataQueryText: '',
-      selectItemCommand: 'OpenContact',
-      data: {
-        title: 'Contacts',
-        columnHeaders: ['id', 'name', 'city'],
-        rows: this.query('allcontacts'),
-      },
     };
   }
 
-  private async queryCommand(
-    command: RequestCommand
-  ): Promise<ResponseCommand> {
+  private queryCommand(command: RequestCommand): ResponseCommand {
     let data: TableData;
 
-    if (command.provider != null && command.provider.toLowerCase() == 'cache') {
-      data = this.cache.readLastTableData();
-      this.cache.clearLastResponse();
+    if (data == null) {
+      data = this.query(command.query);
     }
 
-    if (data == null) {
-      data = await this.query(command.query);
-    }
     return {
       guid: command.guid,
       title: 'Contacts',
-      dataProvider: 'CACHE',
-      selectItemCommand: 'OpenContact',
       data: data,
     };
   }
 
-  private async query(queryName: string): Promise<TableData> {
+  private query(queryName: string): TableData {
     switch (queryName) {
       case 'allcontacts':
         return {
           title: 'Contacts',
           columnHeaders: ['id', 'name', 'city'],
+          selectItemCommand: 'OpenContact',
           rows: [
             { id: '1', name: 'bob', city: 'Omaha' },
             { id: '2', name: 'mary', city: 'Omaha' },
