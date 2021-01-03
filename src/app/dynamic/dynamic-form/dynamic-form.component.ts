@@ -41,10 +41,6 @@ export class DynamicFormComponent implements OnInit {
       return;
     }
 
-    // this.form = this.fb.group({
-    //   first: 'first',
-    // });
-
     this.form = this.fb.group(this.data.record);
 
     Object.keys(this.data.record).forEach((key, index) => {
@@ -53,6 +49,21 @@ export class DynamicFormComponent implements OnInit {
   }
 
   async action(text: string) {
-    alert(text);
+    console.log('command = ' + text);
+    Object.keys(this.data.record).forEach((key, index) => {
+      const control = this.form.get(key);
+      if (control != null) {
+        this.data.record[key] = control.value;
+      }
+      var value = this.data.record[key];
+      console.log('adding field ' + key + ' ' + value);
+    });
+
+    await this.commander.processActionCommand(
+      text,
+      this.id,
+      this.entity,
+      this.data.record
+    );
   }
 }

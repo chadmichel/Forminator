@@ -14,6 +14,19 @@ import { v4 as uuidv4 } from 'uuid';
 export class CommanderService {
   constructor(private router: Router, private cache: CacheService) {}
 
+  async processActionCommand(
+    text: string,
+    id: string,
+    entity: string,
+    record: any
+  ) {
+    this.processCommand({
+      commandType: 'ACTION',
+      data: record,
+      text: text,
+    });
+  }
+
   async processQueryCommand(
     query: string,
     provider: string = 'CACHE'
@@ -53,12 +66,27 @@ export class CommanderService {
   }
 
   async processCommand(command: RequestCommand): Promise<ResponseCommand> {
+    const jsonIn = JSON.stringify(command);
+    console.log(jsonIn);
+
     command.guid = uuidv4();
-    var response = this.internalProcessCommand(command);
+    let response = this.internalProcessCommand(command);
+    if (response == null) {
+      response = {
+        guid: command.guid,
+        title: 'NO RESPONSE',
+        data: null,
+      };
+    }
+
     this.cache.writeLastResponse(command, response);
     if (response.route) {
       this.router.navigate([response.route]);
     }
+
+    const jsonOut = JSON.stringify(response);
+    console.log(jsonOut);
+
     return response;
   }
 
