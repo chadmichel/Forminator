@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { from } from 'rxjs';
+import { combineLatest, from } from 'rxjs';
 import { RequestCommand } from '../dtos/request-command';
 import { ResponseCommand } from '../dtos/response-command';
 import { TableData } from '../dtos/table-data';
+import { DynamicFormData } from '../dtos/dynamic-form-data';
 import { CacheService } from './cache.service';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -25,21 +26,40 @@ export class CommanderService {
     ).data;
   }
 
+  async processSelectCommand(
+    selectItemCommand: string,
+    item: any
+  ): Promise<FormData> {
+    return (
+      await this.processCommand({
+        commandType: 'SELECT',
+        text: selectItemCommand,
+        data: item,
+      })
+    ).data;
+  }
+
+  async processLoadCommand(
+    entityType: string,
+    id: string
+  ): Promise<DynamicFormData> {
+    return (
+      await this.processCommand({
+        commandType: 'LOAD',
+        text: entityType,
+        id: id,
+      })
+    ).data;
+  }
+
   async processCommand(command: RequestCommand): Promise<ResponseCommand> {
-    return new Promise<ResponseCommand>(async (success, failure) => {
-      try {
-        command.guid = uuidv4();
-        var response = this.internalProcessCommand(command);
-        this.cache.writeLastResponse(command, response);
-        if (response.route) {
-          this.router.navigate([response.route]);
-        }
-        success(response);
-      } catch (err) {
-        console.log(err);
-        failure(err);
-      }
-    });
+    command.guid = uuidv4();
+    var response = this.internalProcessCommand(command);
+    this.cache.writeLastResponse(command, response);
+    if (response.route) {
+      this.router.navigate([response.route]);
+    }
+    return response;
   }
 
   currentMenu() {
@@ -65,6 +85,10 @@ export class CommanderService {
         return this.startCommand(command);
       case 'query':
         return this.queryCommand(command);
+      case 'select':
+        return this.selectCommand(command);
+      case 'load':
+        return this.loadCommand(command);
     }
   }
 
@@ -90,6 +114,19 @@ export class CommanderService {
     };
   }
 
+  private selectCommand(command: RequestCommand): ResponseCommand {
+    if (command.text == 'OpenContact') {
+      return {
+        guid: command.guid,
+        title: 'Contact ' + command.data.name,
+        route: '/df/contact/' + command.data.id,
+        data: {
+          title: 'Edit Contact',
+        },
+      };
+    }
+  }
+
   private query(queryName: string): TableData {
     switch (queryName) {
       case 'allcontacts':
@@ -104,9 +141,114 @@ export class CommanderService {
         };
     }
   }
-}
 
-// rows: [
-//   { id: '1', name: 'bob', city: 'Omaha' },
-//   { id: '2', name: 'mary', city: 'Omaha' },
-// ]
+  private loadCommand(command: RequestCommand): ResponseCommand {
+    return {
+      guid: command.guid,
+      title: command.text,
+      data: this.load(command.text, command.id),
+      route: null,
+    };
+  }
+
+  private load(entityType: string, id: string) {
+    switch (entityType) {
+      case 'contact':
+        return {
+          title: 'Edit Contact',
+          sections: [
+            {
+              sectionTitle: 'Personal Information',
+              rows: [
+                {
+                  columns: [
+                    {
+                      control: {
+                        dataField: 'first',
+                        label: 'First',
+                        inputType: 'text',
+                      },
+                    },
+                    {
+                      control: {
+                        dataField: 'last',
+                        label: 'Last',
+                        inputType: 'text',
+                      },
+                    },
+                  ],
+                },
+                {
+                  columns: [
+                    {
+                      control: {
+                        dataField: 'email',
+                        label: 'Email',
+                        inputType: 'text',
+                      },
+                    },
+                    {
+                      control: {
+                        dataField: 'phone',
+                        label: 'Phone',
+                        inputType: 'text',
+                      },
+                    },
+                  ],
+                },
+                {
+                  columns: [
+                    {
+                      control: {
+                        dataField: 'address',
+                        label: 'Address',
+                        inputType: 'text',
+                      },
+                    },
+                  ],
+                },
+                {
+                  columns: [
+                    {
+                      control: {
+                        dataField: 'city',
+                        label: 'City',
+                        inputType: 'text',
+                      },
+                    },
+                    {
+                      control: {
+                        dataField: 'state',
+                        label: 'State',
+                        inputType: 'text',
+                      },
+                    },
+                    {
+                      control: {
+                        dataField: 'zip',
+                        label: 'Zip',
+                        inputType: 'text',
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          record: {
+            id: id,
+            first: 'Bob',
+            last: 'Smith',
+            phone: '123-456-7890',
+            email: 'bob@example.com',
+            address: '123 Main St',
+            city: 'Omaha',
+            state: 'NE',
+            zip: '12345',
+          },
+        };
+    }
+
+    return null;
+  }
+}

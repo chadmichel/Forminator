@@ -5,6 +5,7 @@ export interface RequestCommand {
 
   text?: string;
   query?: string;
+  id?: string;
   data?: any;
   commandType?: string;
 }

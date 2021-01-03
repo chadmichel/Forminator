@@ -19,9 +19,9 @@ const routes: Routes = [
   { path: 'dd/:title/:query/:provider', component: DynamicDashboardComponent },
 
   { path: 'df', component: DynamicFormComponent },
-  { path: 'df/:title', component: DynamicFormComponent },
-  { path: 'df/:title/:id', component: DynamicFormComponent },
-  { path: 'df/:title/:id/:provider', component: DynamicFormComponent },
+  { path: 'df/:entity', component: DynamicFormComponent },
+  { path: 'df/:entity/:id', component: DynamicFormComponent },
+  { path: 'df/:entity/:id/:provider', component: DynamicFormComponent },
 
   { path: '**', redirectTo: 'home' },
 ];

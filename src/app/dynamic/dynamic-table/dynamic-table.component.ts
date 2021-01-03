@@ -65,5 +65,12 @@ export class DynamicTableComponent implements OnInit, AfterViewInit {
     }
   }
 
-  async selectItem() {}
+  async selectItem(item) {
+    if (this.data.selectItemCommand != null) {
+      await this.commander.processSelectCommand(
+        this.data.selectItemCommand,
+        item
+      );
+    }
+  }
 }
