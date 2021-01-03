@@ -246,6 +246,7 @@ export class CommanderService {
             state: 'NE',
             zip: '12345',
           },
+          actions: [{ text: 'Store' }, { text: 'Delete' }],
         };
     }
 

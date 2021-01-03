@@ -20,6 +20,17 @@
           </mat-form-field>
         </div>
       </div>
+      <mat-card-actions *ngIf="data.actions">
+        <button
+          *ngFor="let a of data.actions"
+          (click)="action(a.text)"
+          mat-raised-button
+          color="primary"
+          type="submit"
+        >
+          {{ a.text }}
+        </button>
+      </mat-card-actions>
     </mat-card-content>
   </mat-card>
   <!-- 

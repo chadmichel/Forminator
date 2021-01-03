@@ -51,4 +51,8 @@ export class DynamicFormComponent implements OnInit {
       console.log('adding field ' + key);
     });
   }
+
+  async action(text: string) {
+    alert(text);
+  }
 }
