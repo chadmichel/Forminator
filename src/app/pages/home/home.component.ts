@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommanderService } from 'src/app/services/commander.service';
+import { CommanderService } from 'src/app/dynamic-forms/services/commander.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Component({

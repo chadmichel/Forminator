@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { DynamicFormData } from 'src/app/dtos/dynamic-form-data';
-import { CommanderService } from 'src/app/services/commander.service';
+import { DynamicFormData } from '../dtos/dynamic-form-data';
+import { CommanderService } from '../services/commander.service';
 
 @Component({
   selector: 'app-dynamic-form',

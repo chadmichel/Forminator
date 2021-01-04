@@ -4,9 +4,9 @@ import { ChangeDetectorRef } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
-import { TableData } from 'src/app/dtos/table-data';
-import { CacheService } from 'src/app/services/cache.service';
-import { CommanderService } from 'src/app/services/commander.service';
+import { TableData } from '../dtos/table-data';
+import { CacheService } from '../services/cache.service';
+import { CommanderService } from '../services/commander.service';
 
 export interface PeriodicElement {
   name: string;

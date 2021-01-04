@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { MenuItem } from './dtos/menu-item';
-import { CommanderService } from './services/commander.service';
+import { MenuItem } from './dynamic-forms/dtos/menu-item';
 import { ChangeDetectorRef } from '@angular/core';
+import { CommanderService } from './dynamic-forms/services/commander.service';
 
 @Component({
   selector: 'app-root',
