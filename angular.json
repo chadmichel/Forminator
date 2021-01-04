@@ -23,10 +23,7 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "aot": true,
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss"
@@ -34,6 +31,14 @@
             "scripts": []
           },
           "configurations": {
+            "sim": {
+              "fileReplacements": [
+                {
+                  "replace": "src/app/dynamic-forms/services/commander.service.ts",
+                  "with": "src/app/dynamic-forms/services/sim-commander.service.ts"
+                }
+              ]
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -71,6 +76,9 @@
           "configurations": {
             "production": {
               "browserTarget": "Forminator:build:production"
+            },
+            "sim": {
+              "browserTarget": "Forminator:build:sim"
             }
           }
         },
@@ -87,10 +95,7 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss"
@@ -106,9 +111,7 @@
               "tsconfig.spec.json",
               "e2e/tsconfig.json"
             ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "exclude": ["**/node_modules/**"]
           }
         },
         "e2e": {
@@ -120,6 +123,9 @@
           "configurations": {
             "production": {
               "devServerTarget": "Forminator:serve:production"
+            },
+            "sim": {
+              "devServerTarget": "Forminator:serve:sim"
             }
           }
         }
