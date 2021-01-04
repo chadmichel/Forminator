@@ -70,7 +70,7 @@ export class CommanderService {
     console.log(jsonIn);
 
     command.guid = uuidv4();
-    let response = this.internalProcessCommand(command);
+    let response = await this.internalProcessCommand(command);
     if (response == null) {
       response = {
         guid: command.guid,
@@ -107,16 +107,18 @@ export class CommanderService {
     ];
   }
 
-  private internalProcessCommand(command: RequestCommand): ResponseCommand {
+  private async internalProcessCommand(
+    command: RequestCommand
+  ): Promise<ResponseCommand> {
     switch (command.commandType.toLowerCase()) {
-      case 'start':
-        return this.startCommand(command);
+      // case 'start':
+      //   return this.startCommand(command);
       case 'query':
-        return this.queryCommand(command);
+        return await this.queryCommand(command);
       case 'select':
-        return this.selectCommand(command);
+        return await this.selectCommand(command);
       case 'load':
-        return this.loadCommand(command);
+        return await this.loadCommand(command);
     }
   }
 
@@ -128,156 +130,55 @@ export class CommanderService {
     };
   }
 
-  private queryCommand(command: RequestCommand): ResponseCommand {
-    let data: TableData;
-
-    if (data == null) {
-      data = this.query(command.query);
-    }
-
+  private async queryCommand(
+    command: RequestCommand
+  ): Promise<ResponseCommand> {
     return {
       guid: command.guid,
       title: 'Contacts',
-      data: data,
+      data: await this.query(command.query),
     };
   }
 
-  private selectCommand(command: RequestCommand): ResponseCommand {
-    if (command.text == 'OpenContact') {
-      return {
-        guid: command.guid,
-        title: 'Contact ' + command.data.name,
-        route: '/df/contact/' + command.data.id,
-        data: {
-          title: 'Edit Contact',
-        },
-      };
-    }
+  private async selectCommand(
+    command: RequestCommand
+  ): Promise<ResponseCommand> {
+    return {
+      guid: command.guid,
+      title: command.text + command.data.name,
+      route: '/df/' + command.text + '/' + command.data.id,
+      data: {
+        title: 'Edit ' + command.text,
+      },
+    };
   }
 
-  private query(queryName: string): TableData {
-    switch (queryName) {
-      case 'allcontacts':
-        return {
-          title: 'Contacts',
-          columnHeaders: ['id', 'name', 'city'],
-          selectItemCommand: 'OpenContact',
-          rows: [
-            { id: '1', name: 'NOT bob', city: 'Omaha' },
-            { id: '2', name: 'mary', city: 'Omaha' },
-          ],
-        };
-    }
+  private async query(queryName: string): Promise<TableData> {
+    let json = '';
+    await import('./simulator-files/queries/' + queryName + '.json').then(
+      (data) => {
+        json = data;
+      }
+    );
+    return (json as unknown) as TableData;
   }
 
-  private loadCommand(command: RequestCommand): ResponseCommand {
+  private async loadCommand(command: RequestCommand): Promise<ResponseCommand> {
     return {
       guid: command.guid,
       title: command.text,
-      data: this.load(command.text, command.id),
+      data: await this.load(command.text, command.id),
       route: null,
     };
   }
 
-  private load(entityType: string, id: string) {
-    switch (entityType) {
-      case 'contact':
-        return {
-          title: 'Edit Contact',
-          sections: [
-            {
-              sectionTitle: 'Personal Information',
-              rows: [
-                {
-                  columns: [
-                    {
-                      control: {
-                        dataField: 'first',
-                        label: 'First',
-                        inputType: 'text',
-                      },
-                    },
-                    {
-                      control: {
-                        dataField: 'last',
-                        label: 'Last',
-                        inputType: 'text',
-                      },
-                    },
-                  ],
-                },
-                {
-                  columns: [
-                    {
-                      control: {
-                        dataField: 'email',
-                        label: 'Email',
-                        inputType: 'text',
-                      },
-                    },
-                    {
-                      control: {
-                        dataField: 'phone',
-                        label: 'Phone',
-                        inputType: 'text',
-                      },
-                    },
-                  ],
-                },
-                {
-                  columns: [
-                    {
-                      control: {
-                        dataField: 'address',
-                        label: 'Address',
-                        inputType: 'text',
-                      },
-                    },
-                  ],
-                },
-                {
-                  columns: [
-                    {
-                      control: {
-                        dataField: 'city',
-                        label: 'City',
-                        inputType: 'text',
-                      },
-                    },
-                    {
-                      control: {
-                        dataField: 'state',
-                        label: 'State',
-                        inputType: 'text',
-                      },
-                    },
-                    {
-                      control: {
-                        dataField: 'zip',
-                        label: 'Zip',
-                        inputType: 'text',
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-          record: {
-            id: id,
-            first: 'NOT Bob',
-            last: 'Smith',
-            phone: '123-456-7890',
-            email: 'bob@example.com',
-            address: '123 Main St',
-            city: 'Omaha',
-            state: 'NE',
-            zip: '12345',
-          },
-          actions: [{ text: 'Store' }, { text: 'Delete' }],
-        };
-    }
-
-    return null;
+  private async load(entityType: string, id: string): Promise<DynamicFormData> {
+    let json = '';
+    await import(
+      './simulator-files/load/' + entityType + '.' + id + '.json'
+    ).then((data) => {
+      json = data;
+    });
+    return (json as unknown) as DynamicFormData;
   }
 }
